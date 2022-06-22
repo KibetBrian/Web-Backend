@@ -1,5 +1,11 @@
 dbName := election
 
+#app
+tidy:
+	go mod tidy
+run:
+	go run main.go
+
 initdb:
 	docker run --name postgres -d -e POSTGRES_USER=brian -e POSTGRES_PASSWORD=brian -p 5432:5432 postgres
 startdb:
