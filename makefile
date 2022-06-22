@@ -1,15 +1,18 @@
-database := electiondb
 dbName := election
 
 initdb:
-	docker run --name $(database) -d -e POSTGRES_USER=brian -e POSTGRES_PASSWORD=brian -p 5432:5432 postgres
+	docker run --name postgres -d -e POSTGRES_USER=brian -e POSTGRES_PASSWORD=brian -p 5432:5432 postgres
 startdb:
-	docker start $(database)
+	docker start postgres
 stopdb:
-	docker stop $(database)
+	docker stop postgres
 deldb:
-	docker stop $(database) && docker rm $(database)
+	docker stop postgres && docker rm postgres
 createdb:
-	docker exec -it ${database} createdb $(dbName) --username=brian --owner=brian;
+	docker exec -it postgres createdb ${dbName} --username=brian --owner=brian;
 dropdb:
-	docker exec -it backend dropdb $(dbName)--username=brian
+	docker exec -it backend dropdb ${dbName}--username=brian
+migrateUp: 
+	migrate -path ./db/migrations -database "postgresql://brian:brian@127.0.0.1:5432/election?sslmode=disable" -verbose up
+migrateDown:
+	 migrate -path ./db/migrations -database "postgresql://brian:brian@127.0.0.1:5432/election?sslmode=disable" -verbose down

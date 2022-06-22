@@ -3,14 +3,14 @@ CREATE TYPE "role" AS ENUM (
   'Support'
 );
 
-CREATE TABLE "Users" (
+CREATE TABLE "users" (
   "id" uuid PRIMARY KEY NOT NULL,
   "full_name" varchar NOT NULL,
   "email" varchar UNIQUE NOT NULL,
   "password" varchar NOT NULL
 );
 
-CREATE TABLE "Voters" (
+CREATE TABLE "voters" (
   "id" uuid PRIMARY KEY NOT NULL,
   "full_name" varchar NOT NULL,
   "email" varchar NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE "Voters" (
   "voters_public_address" varchar NOT NULL
 );
 
-CREATE TABLE "Admins" (
+CREATE TABLE "admins" (
   "id" uuid PRIMARY KEY NOT NULL,
   "full_name" varchar NOT NULL,
   "email" varchar NOT NULL,
@@ -28,7 +28,7 @@ CREATE TABLE "Admins" (
   "role" role NOT NULL
 );
 
-CREATE TABLE "Contestants" (
+CREATE TABLE "contestants" (
   "id" uuid PRIMARY KEY NOT NULL,
   "full_name" varchar NOT NULL,
   "email" varchar NOT NULL,
@@ -38,12 +38,12 @@ CREATE TABLE "Contestants" (
   "description" varchar NOT NULL
 );
 
-CREATE INDEX ON "Admins" ("full_name");
+CREATE INDEX ON "admins" ("full_name");
 
-CREATE INDEX ON "Contestants" ("full_name");
+CREATE INDEX ON "contestants" ("full_name");
 
-ALTER TABLE "Voters" ADD FOREIGN KEY ("email") REFERENCES "Users" ("email");
+ALTER TABLE "voters" ADD FOREIGN KEY ("email") REFERENCES "users" ("email");
 
-ALTER TABLE "Admins" ADD FOREIGN KEY ("email") REFERENCES "Users" ("email");
+ALTER TABLE "admins" ADD FOREIGN KEY ("email") REFERENCES "users" ("email");
 
-ALTER TABLE "Contestants" ADD FOREIGN KEY ("email") REFERENCES "Users" ("email");
+ALTER TABLE "contestants" ADD FOREIGN KEY ("email") REFERENCES "users" ("email");
