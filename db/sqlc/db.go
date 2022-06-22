@@ -24,25 +24,49 @@ func New(db DBTX) *Queries {
 func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	q := Queries{db: db}
 	var err error
-	if q.getUserStmt, err = db.PrepareContext(ctx, getUser); err != nil {
-		return nil, fmt.Errorf("error preparing query GetUser: %w", err)
-	}
 	if q.insertUserStmt, err = db.PrepareContext(ctx, insertUser); err != nil {
 		return nil, fmt.Errorf("error preparing query InsertUser: %w", err)
+	}
+	if q.registerCandidateStmt, err = db.PrepareContext(ctx, registerCandidate); err != nil {
+		return nil, fmt.Errorf("error preparing query RegisterCandidate: %w", err)
+	}
+	if q.registerVoterStmt, err = db.PrepareContext(ctx, registerVoter); err != nil {
+		return nil, fmt.Errorf("error preparing query RegisterVoter: %w", err)
+	}
+	if q.seedAdminStmt, err = db.PrepareContext(ctx, seedAdmin); err != nil {
+		return nil, fmt.Errorf("error preparing query SeedAdmin: %w", err)
+	}
+	if q.updateVoterStmt, err = db.PrepareContext(ctx, updateVoter); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateVoter: %w", err)
 	}
 	return &q, nil
 }
 
 func (q *Queries) Close() error {
 	var err error
-	if q.getUserStmt != nil {
-		if cerr := q.getUserStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getUserStmt: %w", cerr)
-		}
-	}
 	if q.insertUserStmt != nil {
 		if cerr := q.insertUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing insertUserStmt: %w", cerr)
+		}
+	}
+	if q.registerCandidateStmt != nil {
+		if cerr := q.registerCandidateStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing registerCandidateStmt: %w", cerr)
+		}
+	}
+	if q.registerVoterStmt != nil {
+		if cerr := q.registerVoterStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing registerVoterStmt: %w", cerr)
+		}
+	}
+	if q.seedAdminStmt != nil {
+		if cerr := q.seedAdminStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing seedAdminStmt: %w", cerr)
+		}
+	}
+	if q.updateVoterStmt != nil {
+		if cerr := q.updateVoterStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateVoterStmt: %w", cerr)
 		}
 	}
 	return err
@@ -82,17 +106,23 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db             DBTX
-	tx             *sql.Tx
-	getUserStmt    *sql.Stmt
-	insertUserStmt *sql.Stmt
+	db                    DBTX
+	tx                    *sql.Tx
+	insertUserStmt        *sql.Stmt
+	registerCandidateStmt *sql.Stmt
+	registerVoterStmt     *sql.Stmt
+	seedAdminStmt         *sql.Stmt
+	updateVoterStmt       *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:             tx,
-		tx:             tx,
-		getUserStmt:    q.getUserStmt,
-		insertUserStmt: q.insertUserStmt,
+		db:                    tx,
+		tx:                    tx,
+		insertUserStmt:        q.insertUserStmt,
+		registerCandidateStmt: q.registerCandidateStmt,
+		registerVoterStmt:     q.registerVoterStmt,
+		seedAdminStmt:         q.seedAdminStmt,
+		updateVoterStmt:       q.updateVoterStmt,
 	}
 }

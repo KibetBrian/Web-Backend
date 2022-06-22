@@ -7,30 +7,11 @@ package db
 
 import (
 	"context"
-
-	"github.com/google/uuid"
 )
 
-const getUser = `-- name: GetUser :one
-SELECT id, full_name, email, password FROM users
-WHERE id = $1 LIMIT 1
-`
-
-func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
-	row := q.queryRow(ctx, q.getUserStmt, getUser, id)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.FullName,
-		&i.Email,
-		&i.Password,
-	)
-	return i, err
-}
-
 const insertUser = `-- name: InsertUser :one
-INSERT INTO users(full_name, email, password)
-VALUES ($1, $2, $3) RETURNING id, full_name, email, password
+INSERT INTO users (full_name, email, password)
+VALUES($1, $2, $3) RETURNING id, full_name, email, password
 `
 
 type InsertUserParams struct {

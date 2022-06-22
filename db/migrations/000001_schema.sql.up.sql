@@ -16,7 +16,7 @@ CREATE TABLE "voters" (
   "email" varchar NOT NULL,
   "password" varchar NOT NULL,
   "registered_at" timestamptz NOT NULL DEFAULT 'now()',
-  "voted_at" timestamptz NOT NULL DEFAULT 'now()',
+  "voted_at" timestamptz DEFAULT 'now()',
   "voters_public_address" varchar NOT NULL
 );
 

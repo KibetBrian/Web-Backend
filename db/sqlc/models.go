@@ -57,11 +57,11 @@ type User struct {
 }
 
 type Voter struct {
-	ID                  uuid.UUID `json:"id"`
-	FullName            string    `json:"fullName"`
-	Email               string    `json:"email"`
-	Password            string    `json:"password"`
-	RegisteredAt        time.Time `json:"registeredAt"`
-	VotedAt             time.Time `json:"votedAt"`
-	VotersPublicAddress string    `json:"votersPublicAddress"`
+	ID                  uuid.UUID    `json:"id"`
+	FullName            string       `json:"fullName"`
+	Email               string       `json:"email"`
+	Password            string       `json:"password"`
+	RegisteredAt        time.Time    `json:"registeredAt"`
+	VotedAt             sql.NullTime `json:"votedAt"`
+	VotersPublicAddress string       `json:"votersPublicAddress"`
 }
