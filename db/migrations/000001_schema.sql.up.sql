@@ -1,17 +1,19 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE TYPE "role" AS ENUM (
   'Registration',
   'Support'
 );
 
 CREATE TABLE "users" (
-  "id" uuid PRIMARY KEY NOT NULL,
+  "id" uuid PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
   "full_name" varchar NOT NULL,
   "email" varchar UNIQUE NOT NULL,
   "password" varchar NOT NULL
 );
 
 CREATE TABLE "voters" (
-  "id" uuid PRIMARY KEY NOT NULL,
+  "id" uuid PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
   "full_name" varchar NOT NULL,
   "email" varchar NOT NULL,
   "password" varchar NOT NULL,
