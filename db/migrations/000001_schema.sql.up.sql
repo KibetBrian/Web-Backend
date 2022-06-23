@@ -23,7 +23,7 @@ CREATE TABLE "voters" (
 );
 
 CREATE TABLE "admins" (
-  "id" uuid PRIMARY KEY NOT NULL,
+  "id" uuid PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
   "full_name" varchar NOT NULL,
   "email" varchar NOT NULL,
   "password" varchar NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE "admins" (
 );
 
 CREATE TABLE "contestants" (
-  "id" uuid PRIMARY KEY NOT NULL,
+  "id" uuid PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
   "full_name" varchar NOT NULL,
   "email" varchar NOT NULL,
   "password" varchar NOT NULL,
