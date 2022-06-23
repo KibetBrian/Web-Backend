@@ -24,17 +24,20 @@ func New(db DBTX) *Queries {
 func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	q := Queries{db: db}
 	var err error
-	if q.insertUserStmt, err = db.PrepareContext(ctx, insertUser); err != nil {
-		return nil, fmt.Errorf("error preparing query InsertUser: %w", err)
-	}
 	if q.registerCandidateStmt, err = db.PrepareContext(ctx, registerCandidate); err != nil {
 		return nil, fmt.Errorf("error preparing query RegisterCandidate: %w", err)
+	}
+	if q.registerUserStmt, err = db.PrepareContext(ctx, registerUser); err != nil {
+		return nil, fmt.Errorf("error preparing query RegisterUser: %w", err)
 	}
 	if q.registerVoterStmt, err = db.PrepareContext(ctx, registerVoter); err != nil {
 		return nil, fmt.Errorf("error preparing query RegisterVoter: %w", err)
 	}
 	if q.seedAdminStmt, err = db.PrepareContext(ctx, seedAdmin); err != nil {
 		return nil, fmt.Errorf("error preparing query SeedAdmin: %w", err)
+	}
+	if q.updateUserStmt, err = db.PrepareContext(ctx, updateUser); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateUser: %w", err)
 	}
 	if q.updateVoterStmt, err = db.PrepareContext(ctx, updateVoter); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateVoter: %w", err)
@@ -44,14 +47,14 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 
 func (q *Queries) Close() error {
 	var err error
-	if q.insertUserStmt != nil {
-		if cerr := q.insertUserStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing insertUserStmt: %w", cerr)
-		}
-	}
 	if q.registerCandidateStmt != nil {
 		if cerr := q.registerCandidateStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing registerCandidateStmt: %w", cerr)
+		}
+	}
+	if q.registerUserStmt != nil {
+		if cerr := q.registerUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing registerUserStmt: %w", cerr)
 		}
 	}
 	if q.registerVoterStmt != nil {
@@ -62,6 +65,11 @@ func (q *Queries) Close() error {
 	if q.seedAdminStmt != nil {
 		if cerr := q.seedAdminStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing seedAdminStmt: %w", cerr)
+		}
+	}
+	if q.updateUserStmt != nil {
+		if cerr := q.updateUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateUserStmt: %w", cerr)
 		}
 	}
 	if q.updateVoterStmt != nil {
@@ -108,10 +116,11 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 type Queries struct {
 	db                    DBTX
 	tx                    *sql.Tx
-	insertUserStmt        *sql.Stmt
 	registerCandidateStmt *sql.Stmt
+	registerUserStmt      *sql.Stmt
 	registerVoterStmt     *sql.Stmt
 	seedAdminStmt         *sql.Stmt
+	updateUserStmt        *sql.Stmt
 	updateVoterStmt       *sql.Stmt
 }
 
@@ -119,10 +128,11 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
 		db:                    tx,
 		tx:                    tx,
-		insertUserStmt:        q.insertUserStmt,
 		registerCandidateStmt: q.registerCandidateStmt,
+		registerUserStmt:      q.registerUserStmt,
 		registerVoterStmt:     q.registerVoterStmt,
 		seedAdminStmt:         q.seedAdminStmt,
+		updateUserStmt:        q.updateUserStmt,
 		updateVoterStmt:       q.updateVoterStmt,
 	}
 }

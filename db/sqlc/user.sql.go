@@ -9,19 +9,41 @@ import (
 	"context"
 )
 
-const insertUser = `-- name: InsertUser :one
+const registerUser = `-- name: RegisterUser :one
 INSERT INTO users (full_name, email, password)
 VALUES($1, $2, $3) RETURNING id, full_name, email, password
 `
 
-type InsertUserParams struct {
+type RegisterUserParams struct {
 	FullName string `json:"fullName"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-func (q *Queries) InsertUser(ctx context.Context, arg InsertUserParams) (User, error) {
-	row := q.queryRow(ctx, q.insertUserStmt, insertUser, arg.FullName, arg.Email, arg.Password)
+func (q *Queries) RegisterUser(ctx context.Context, arg RegisterUserParams) (User, error) {
+	row := q.queryRow(ctx, q.registerUserStmt, registerUser, arg.FullName, arg.Email, arg.Password)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.FullName,
+		&i.Email,
+		&i.Password,
+	)
+	return i, err
+}
+
+const updateUser = `-- name: UpdateUser :one
+UPDATE users SET email = $1, password = $2 WHERE email = $3 RETURNING id, full_name, email, password
+`
+
+type UpdateUserParams struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Email_2  string `json:"email2"`
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
+	row := q.queryRow(ctx, q.updateUserStmt, updateUser, arg.Email, arg.Password, arg.Email_2)
 	var i User
 	err := row.Scan(
 		&i.ID,

@@ -5,6 +5,8 @@ tidy:
 	go mod tidy
 run:
 	go run main.go
+test:
+	go test ./... -v -cover
 
 initdb:
 	docker run --name postgres -d -e POSTGRES_USER=brian -e POSTGRES_PASSWORD=brian -p 5432:5432 postgres
