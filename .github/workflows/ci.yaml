@@ -18,7 +18,7 @@ jobs:
         env:
            POSTGRES_USER: brian
            POSTGRES_PASSWORD: brian
-           POSTRES_DB: election
+           POSTGRES_DB: election
         ports:
           - 5432:5432
 
