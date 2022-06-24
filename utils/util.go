@@ -9,19 +9,20 @@ import (
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
+
 //Generates random int between min and max
 func GenerateRandInt(min, max int) int {
 	return rand.Intn(max-min+1) + min
 }
 
 //Takes interger n as input and returns random string of length n
-func GenerateRandString(n int) string{
+func GenerateRandString() string{
 	const alphabet = "abcdefghijklmnopqrstuvwxyz"
 
 	length := GenerateRandInt(0, len(alphabet))
 	var sb strings.Builder
-	for i:=0; i<=n; i++{
-		sb.WriteByte(alphabet[GenerateRandInt(0, length)])
+	for i:=0; i<length; i++{
+		sb.WriteByte(alphabet[GenerateRandInt(0, len(alphabet)-1)])
 	}
 
 	return sb.String()
@@ -36,8 +37,8 @@ func GenerateRandomUserName() string{
 	var fullName strings.Builder
 
 	//Generate random first and last names
-	firstName.WriteString(GenerateRandString(GenerateRandInt(0,26)))
-	lastName.WriteString(GenerateRandString(GenerateRandInt(0,26)))
+	firstName.WriteString(GenerateRandString())
+	lastName.WriteString(GenerateRandString())
 
 	//Concatinate the names
 	fullName.WriteString(firstName.String())
@@ -48,7 +49,7 @@ func GenerateRandomUserName() string{
 }
 
 //Generate random password
-func GenerateRandomPassword (min, max int) string {
+func GenerateRandomPassword(min, max int) string {
 	const characters ="`1234567890qwertyuiopasdfghjklzxcvbnm,./!@#$%^&*()-=_+?><ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	var sb strings.Builder
 	length := GenerateRandInt(min, max);
@@ -60,12 +61,12 @@ func GenerateRandomPassword (min, max int) string {
 
 
 //Generates random email
-func GenerateRandomEmail () string{
+func GenerateRandomEmail() string{
 	const at = "@"
 	var sb strings.Builder
 	domains := []string{".com",".net",".tech"}
 	providers:=[]string{"gmail","outlook","yahoo","icloud"}
-	name := GenerateRandString(int(GenerateRandInt(0,64)));
+	name := GenerateRandString();
 	domain:=domains[rand.Intn(len(domains))]
 	provider := providers[rand.Intn(len(domains))]
 	sb.WriteString(name)
