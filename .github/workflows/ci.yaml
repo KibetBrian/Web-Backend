@@ -12,6 +12,16 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
 
+    services:
+      postgresql:
+        image: postgres:14.4
+        env:
+           POSTGRES_USER: brian
+           POSTGRES_PASSWORD: brian
+           POSTRES_DB: election
+        ports:
+          - 5432:5432
+
     steps:
       - name: Set Go
         uses: actions/setup-go@v3
@@ -20,6 +30,14 @@ jobs:
       
       - name: Check out code
         uses: actions/checkout@v2
+      
+      - name: Install golang migrateUp
+        run: |
+          curl -LO https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-arm64.tar.gz
+          sudo mv migrate.linux-arm64.tar.gz /usr/bin/migrate
+
+      - name: Database migrations
+        run: make migrateUp
 
       - name: run Test
         run: |
