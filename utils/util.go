@@ -10,20 +10,18 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 //Generates random int between min and max
-func GenerateRandInt(min,max int64) int64{
-	dif := max-min
-	randomNumber := min + rand.Int63n(dif)
-   return randomNumber
+func GenerateRandInt(min, max int) int {
+	return rand.Intn(max-min+1) + min
 }
 
 //Takes interger n as input and returns random string of length n
 func GenerateRandString(n int) string{
 	const alphabet = "abcdefghijklmnopqrstuvwxyz"
 
-	length := GenerateRandInt(0,int64(len(alphabet)))
+	length := GenerateRandInt(0, len(alphabet))
 	var sb strings.Builder
 	for i:=0; i<=n; i++{
-		sb.WriteByte(alphabet[GenerateRandInt(0,int64(length))])
+		sb.WriteByte(alphabet[GenerateRandInt(0, length)])
 	}
 
 	return sb.String()
@@ -38,8 +36,8 @@ func GenerateRandomUserName() string{
 	var fullName strings.Builder
 
 	//Generate random first and last names
-	firstName.WriteString(GenerateRandString(int(GenerateRandInt(0,50))))
-	lastName.WriteString(GenerateRandString(int(GenerateRandInt(0,50))))
+	firstName.WriteString(GenerateRandString(GenerateRandInt(0,26)))
+	lastName.WriteString(GenerateRandString(GenerateRandInt(0,26)))
 
 	//Concatinate the names
 	fullName.WriteString(firstName.String())
@@ -50,12 +48,12 @@ func GenerateRandomUserName() string{
 }
 
 //Generate random password
-func GenerateRandomPassword (min, max int64) string {
+func GenerateRandomPassword (min, max int) string {
 	const characters ="`1234567890qwertyuiopasdfghjklzxcvbnm,./!@#$%^&*()-=_+?><ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	var sb strings.Builder
 	length := GenerateRandInt(min, max);
 	for i:=0; i<=int(length); i++{
-		sb.WriteByte(characters[GenerateRandInt(min,length)])
+		sb.WriteByte(characters[GenerateRandInt(min, length)])
 	}
 	return sb.String()
 }
@@ -75,4 +73,19 @@ func GenerateRandomEmail () string{
 	sb.WriteString(provider)
 	sb.WriteString(domain)
 	return sb.String()
+}
+
+func RandomSentenceGenerator() string{
+	longString := "ou do not need to be a content creator or an influencer to land a job in tech.Back-end web development is a load of CRUD.80% of the time, the other 20% is: micro services, infrastructure, data transportation, predictive models, design patterns, architecture, data modeling, graph algorithms, …"
+	words := strings.Split(longString," ")
+
+	len := len(words)
+	sentence := []string{}
+	cond :=int(GenerateRandInt(4,len))
+	for i := 0; i< cond; i++ {
+		r := GenerateRandInt(0, len-1)
+		sentence=append(sentence,words[r])
+	}
+	sent := strings.Join(sentence, "");
+	return sent
 }
