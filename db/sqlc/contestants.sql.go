@@ -9,21 +9,23 @@ import (
 	"context"
 )
 
-const registerCandidate = `-- name: RegisterCandidate :one
-INSERT INTO contestants(full_name,password,position, description)
-VALUES ($1,$2,$3,$4) RETURNING id, full_name, email, password, position, registered_at, description
+const registerContestant = `-- name: RegisterContestant :one
+INSERT INTO contestants(full_name,email,password,position, description)
+VALUES ($1,$2,$3,$4, $5) RETURNING id, full_name, email, password, position, registered_at, description
 `
 
-type RegisterCandidateParams struct {
+type RegisterContestantParams struct {
 	FullName    string `json:"fullName"`
+	Email       string `json:"email"`
 	Password    string `json:"password"`
 	Position    string `json:"position"`
 	Description string `json:"description"`
 }
 
-func (q *Queries) RegisterCandidate(ctx context.Context, arg RegisterCandidateParams) (Contestant, error) {
-	row := q.queryRow(ctx, q.registerCandidateStmt, registerCandidate,
+func (q *Queries) RegisterContestant(ctx context.Context, arg RegisterContestantParams) (Contestant, error) {
+	row := q.queryRow(ctx, q.registerContestantStmt, registerContestant,
 		arg.FullName,
+		arg.Email,
 		arg.Password,
 		arg.Position,
 		arg.Description,

@@ -24,8 +24,8 @@ func New(db DBTX) *Queries {
 func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	q := Queries{db: db}
 	var err error
-	if q.registerCandidateStmt, err = db.PrepareContext(ctx, registerCandidate); err != nil {
-		return nil, fmt.Errorf("error preparing query RegisterCandidate: %w", err)
+	if q.registerContestantStmt, err = db.PrepareContext(ctx, registerContestant); err != nil {
+		return nil, fmt.Errorf("error preparing query RegisterContestant: %w", err)
 	}
 	if q.registerUserStmt, err = db.PrepareContext(ctx, registerUser); err != nil {
 		return nil, fmt.Errorf("error preparing query RegisterUser: %w", err)
@@ -47,9 +47,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 
 func (q *Queries) Close() error {
 	var err error
-	if q.registerCandidateStmt != nil {
-		if cerr := q.registerCandidateStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing registerCandidateStmt: %w", cerr)
+	if q.registerContestantStmt != nil {
+		if cerr := q.registerContestantStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing registerContestantStmt: %w", cerr)
 		}
 	}
 	if q.registerUserStmt != nil {
@@ -114,25 +114,25 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                    DBTX
-	tx                    *sql.Tx
-	registerCandidateStmt *sql.Stmt
-	registerUserStmt      *sql.Stmt
-	registerVoterStmt     *sql.Stmt
-	seedAdminStmt         *sql.Stmt
-	updateUserStmt        *sql.Stmt
-	updateVoterStmt       *sql.Stmt
+	db                     DBTX
+	tx                     *sql.Tx
+	registerContestantStmt *sql.Stmt
+	registerUserStmt       *sql.Stmt
+	registerVoterStmt      *sql.Stmt
+	seedAdminStmt          *sql.Stmt
+	updateUserStmt         *sql.Stmt
+	updateVoterStmt        *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                    tx,
-		tx:                    tx,
-		registerCandidateStmt: q.registerCandidateStmt,
-		registerUserStmt:      q.registerUserStmt,
-		registerVoterStmt:     q.registerVoterStmt,
-		seedAdminStmt:         q.seedAdminStmt,
-		updateUserStmt:        q.updateUserStmt,
-		updateVoterStmt:       q.updateVoterStmt,
+		db:                     tx,
+		tx:                     tx,
+		registerContestantStmt: q.registerContestantStmt,
+		registerUserStmt:       q.registerUserStmt,
+		registerVoterStmt:      q.registerVoterStmt,
+		seedAdminStmt:          q.seedAdminStmt,
+		updateUserStmt:         q.updateUserStmt,
+		updateVoterStmt:        q.updateVoterStmt,
 	}
 }
