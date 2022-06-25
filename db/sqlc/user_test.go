@@ -50,3 +50,12 @@ func TestCheckEmail (t *testing.T) {
 	require.Equal(t, res.Email, user.Email);
 	require.Equal(t, res.Count,int64(1))
 }
+
+func TestGetUser(t *testing.T) {
+	user := RegisterUser(t)
+	ctx := context.Background();
+	res, err := testQueries.GetUser(ctx,user.ID)
+	require.NoError(t, err)
+	require.Equal(t, res.Email, user.Email)
+	require.Equal(t,res.FullName, user.FullName)
+}
