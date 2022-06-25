@@ -9,15 +9,13 @@ test:
 	go test ./... -v -cover
 
 initdb:
-	docker run --name postgres -d -e POSTGRES_USER=brian -e POSTGRES_PASSWORD=brian -p 5432:5432 postgres
+	docker run --name postgres -d -e POSTGRES_USER=brian -e POSTGRES_PASSWORD=brian -p 5432:5432 postgres && sleep 10 && docker exec -it postgres createdb ${dbName} --username=brian --owner=brian;
 startdb:
 	docker start postgres
 stopdb:
 	docker stop postgres
 deldb:
-	docker stop postgres && docker rm postgres
-createdb:
-	docker exec -it postgres createdb ${dbName} --username=brian --owner=brian;
+	docker stop postgres && docker rm postgres	
 dropdb:
 	docker exec -it backend dropdb ${dbName}--username=brian
 migrateUp: 
