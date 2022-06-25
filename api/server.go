@@ -8,6 +8,6 @@ import (
 func NewServer() *Server{
 	server := &Server{db: DBQueries(), router: gin.Default()}	
 
-	server.router.POST("/user/create", server.CreateUser)
+	server.router.POST("/user/create", server.RegisterUser)
 	return server;
 }

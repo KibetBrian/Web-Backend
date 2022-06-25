@@ -17,7 +17,7 @@ type User struct {
 }
 
 
-func (s *Server) CreateUser(ctx *gin.Context){
+func (s *Server) RegisterUser(ctx *gin.Context){
 	var user User
 
 	err := ctx.ShouldBindJSON(&user)
