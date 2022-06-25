@@ -9,6 +9,22 @@ import (
 	"context"
 )
 
+const checkEmail = `-- name: CheckEmail :one
+SELECT email, count(*) FROM users WHERE email = $1 GROUP BY email
+`
+
+type CheckEmailRow struct {
+	Email string `json:"email"`
+	Count int64  `json:"count"`
+}
+
+func (q *Queries) CheckEmail(ctx context.Context, email string) (CheckEmailRow, error) {
+	row := q.queryRow(ctx, q.checkEmailStmt, checkEmail, email)
+	var i CheckEmailRow
+	err := row.Scan(&i.Email, &i.Count)
+	return i, err
+}
+
 const registerUser = `-- name: RegisterUser :one
 INSERT INTO users (full_name, email, password)
 VALUES($1, $2, $3) RETURNING id, full_name, email, password
