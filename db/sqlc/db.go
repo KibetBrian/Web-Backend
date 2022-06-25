@@ -24,6 +24,9 @@ func New(db DBTX) *Queries {
 func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	q := Queries{db: db}
 	var err error
+	if q.checkEmailStmt, err = db.PrepareContext(ctx, checkEmail); err != nil {
+		return nil, fmt.Errorf("error preparing query CheckEmail: %w", err)
+	}
 	if q.registerContestantStmt, err = db.PrepareContext(ctx, registerContestant); err != nil {
 		return nil, fmt.Errorf("error preparing query RegisterContestant: %w", err)
 	}
@@ -47,6 +50,11 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 
 func (q *Queries) Close() error {
 	var err error
+	if q.checkEmailStmt != nil {
+		if cerr := q.checkEmailStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing checkEmailStmt: %w", cerr)
+		}
+	}
 	if q.registerContestantStmt != nil {
 		if cerr := q.registerContestantStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing registerContestantStmt: %w", cerr)
@@ -116,6 +124,7 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 type Queries struct {
 	db                     DBTX
 	tx                     *sql.Tx
+	checkEmailStmt         *sql.Stmt
 	registerContestantStmt *sql.Stmt
 	registerUserStmt       *sql.Stmt
 	registerVoterStmt      *sql.Stmt
@@ -128,6 +137,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
 		db:                     tx,
 		tx:                     tx,
+		checkEmailStmt:         q.checkEmailStmt,
 		registerContestantStmt: q.registerContestantStmt,
 		registerUserStmt:       q.registerUserStmt,
 		registerVoterStmt:      q.registerVoterStmt,
