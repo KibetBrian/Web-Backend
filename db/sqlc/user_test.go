@@ -40,4 +40,13 @@ func TestUpdateUser(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, arg.Email, res.Email)
 	require.Equal(t, arg.Password, res.Password)
+};
+
+func TestCheckEmail (t *testing.T) {
+	user := RegisterUser(t);
+	ctx := context.Background()
+	res, err := testQueries.CheckEmail(ctx, user.Email)
+	require.NoError(t, err)
+	require.Equal(t, res.Email, user.Email);
+	require.Equal(t, res.Count,int64(1))
 }
