@@ -8,3 +8,6 @@ UPDATE users SET email = $1, password = $2 WHERE email = $3 RETURNING *;
 -- name: CheckEmail :one
 SELECT email, count(*) FROM users WHERE email = $1 GROUP BY email;
 
+-- name: GetUser :one
+SELECT * FROM users WHERE id=$1;
+
