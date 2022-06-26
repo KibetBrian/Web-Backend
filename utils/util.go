@@ -4,6 +4,8 @@ import (
 	"math/rand"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 func init() {
@@ -89,4 +91,12 @@ func RandomSentenceGenerator() string{
 	}
 	sent := strings.Join(sentence, "");
 	return sent
+}
+
+func ErrResponse(message string, err error) gin.H{
+	res := gin.H{
+		"Message": message,
+		"Error: ": err,
+	}
+	return res
 }
