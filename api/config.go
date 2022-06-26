@@ -33,7 +33,7 @@ func DBQueries() *db.Queries{
 }
 
 func (s *Server) Start(address string){
-	err := s.router.Run()
+	err := s.router.Run(address)
 	if err != nil {
 		log.Fatalf("\nFailed to start the server. Error: %v", err)
 	}

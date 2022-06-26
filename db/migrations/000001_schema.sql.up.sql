@@ -13,11 +13,10 @@ CREATE TABLE "users" (
 );
 
 CREATE TABLE "voters" (
-  "id" uuid PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+  "id" uuid NOT NULL DEFAULT  uuid_generate_v4(),
   "full_name" varchar NOT NULL,
   "email" varchar NOT NULL,
-  "password" varchar NOT NULL,
-  "registered_at" timestamptz NOT NULL DEFAULT 'now()',
+  "registered_at" timestamptz PRIMARY KEY NOT NULL DEFAULT 'now()',
   "voted_at" timestamptz DEFAULT 'now()',
   "voters_public_address" varchar NOT NULL
 );

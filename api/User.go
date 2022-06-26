@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"log"
 	"net/http"
 
 	db "github.com/KibetBrian/backend/db/sqlc"
@@ -69,14 +68,10 @@ func (s *Server) GetUser(ctx *gin.Context){
 
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
-		log.Println("UUid: ", req)
-		ctx.JSON(http.StatusBadRequest, ErrResponse("Check uri", err))
-		return
-	}
-	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, ErrResponse("Error occured", err))
 		return
 	}
+	
 	user, err := s.db.GetUser(context.Background(), req.Id)
 	if err != nil {
 		if err == sql.ErrNoRows{

@@ -5,5 +5,5 @@ import (
 
 func main() {
 	server := api.NewServer()
-	server.Start("http://localhost:8080/")
+	server.Start(":8080")
 }

@@ -10,7 +10,8 @@ func NewServer() *Server{
 
 	server.router.POST("/user/create", server.RegisterUser)
 	server.router.GET("/user/get", server.GetUser)
-
+	server.router.GET("/voter/chain", server.GetChainVoters)
+	server.router.POST("/voter/register", server.RegisterVoter)
 
 	return server;
 }
