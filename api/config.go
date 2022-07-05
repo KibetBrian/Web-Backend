@@ -5,8 +5,9 @@ import (
 	"log"
 
 	db "github.com/KibetBrian/backend/db/sqlc"
-	_ "github.com/lib/pq"
+	"github.com/KibetBrian/backend/utils"
 	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
 )
 
 const (
@@ -20,7 +21,11 @@ type Server struct{
 }
 
 func Conn() *sql.DB{
-	conn, err := sql.Open(dbDriver, dbSource)
+	configs, err :=utils.LoadConfig("./")
+	if err != nil{
+		log.Fatalf("\nFailed to load enviroment variables. Err %v", err)
+	}
+	conn, err := sql.Open(configs.DbDriver, configs.DbSource)
 	if err != nil {
 		log.Fatalf("\n Database Connection Failed. Error : %v\n", err)
 	}
