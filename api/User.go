@@ -16,9 +16,19 @@ type User struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
+type LoginRequest struct {
+	Email string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
 
 type GetUserRequest struct {
 	Id uuid.UUID `json:"id" uri:"email" binding:"required"`
+}
+
+type LoginResponse struct {
+	ID       uuid.UUID `json:"id"`
+	FullName string    `json:"fullName"`
+	Email    string    `json:"email"`
 }
 
 
@@ -82,4 +92,34 @@ func (s *Server) GetUser(ctx *gin.Context){
 		return
 	}
 	ctx.JSON(http.StatusOK, user)
+}
+
+func (s *Server)Login (c *gin.Context){
+	var req LoginRequest
+
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, ErrResponse("Invalid credentials format", err))
+		return
+	}
+	ctx := context.Background()
+	user, err := s.db.GetUserByEmail(ctx, req.Email)
+	if err != nil {
+		if err == sql.ErrNoRows{
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, ErrResponse("Error occured while getting email", err))
+		return
+	}
+	if (user.Password != req.Password){
+		c.JSON(http.StatusUnauthorized, ErrResponse("Invalid email or password", nil))
+		return
+	}
+	res := &LoginResponse{
+		ID: user.ID,
+		FullName: user.FullName,
+		Email: user.Email,
+	}
+	c.JSON(http.StatusOK,res)
 }
