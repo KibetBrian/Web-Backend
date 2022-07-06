@@ -43,6 +43,22 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 	return i, err
 }
 
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, full_name, email, password FROM users WHERE email = $1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.queryRow(ctx, q.getUserByEmailStmt, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.FullName,
+		&i.Email,
+		&i.Password,
+	)
+	return i, err
+}
+
 const registerUser = `-- name: RegisterUser :one
 INSERT INTO users (full_name, email, password)
 VALUES($1, $2, $3) RETURNING id, full_name, email, password
