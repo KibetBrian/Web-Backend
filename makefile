@@ -22,3 +22,6 @@ migrateUp:
 	migrate -path ./db/migrations -database "postgresql://brian:brian@127.0.0.1:5432/election?sslmode=disable" -verbose up
 migrateDown:
 	 migrate -path ./db/migrations -database "postgresql://brian:brian@127.0.0.1:5432/election?sslmode=disable" -verbose down
+sqlcGenerate:
+	docker run --rm -v $(pwd):/src -w /src kjconroy/sqlc generate
+
