@@ -27,6 +27,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.checkEmailStmt, err = db.PrepareContext(ctx, checkEmail); err != nil {
 		return nil, fmt.Errorf("error preparing query CheckEmail: %w", err)
 	}
+	if q.getAllCandidatesStmt, err = db.PrepareContext(ctx, getAllCandidates); err != nil {
+		return nil, fmt.Errorf("error preparing query GetAllCandidates: %w", err)
+	}
+	if q.getTotalUsersNumStmt, err = db.PrepareContext(ctx, getTotalUsersNum); err != nil {
+		return nil, fmt.Errorf("error preparing query GetTotalUsersNum: %w", err)
+	}
 	if q.getUserStmt, err = db.PrepareContext(ctx, getUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUser: %w", err)
 	}
@@ -45,6 +51,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.seedAdminStmt, err = db.PrepareContext(ctx, seedAdmin); err != nil {
 		return nil, fmt.Errorf("error preparing query SeedAdmin: %w", err)
 	}
+	if q.totalVotedVotersStmt, err = db.PrepareContext(ctx, totalVotedVoters); err != nil {
+		return nil, fmt.Errorf("error preparing query TotalVotedVoters: %w", err)
+	}
+	if q.totalVotersNumStmt, err = db.PrepareContext(ctx, totalVotersNum); err != nil {
+		return nil, fmt.Errorf("error preparing query TotalVotersNum: %w", err)
+	}
 	if q.updateUserStmt, err = db.PrepareContext(ctx, updateUser); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateUser: %w", err)
 	}
@@ -59,6 +71,16 @@ func (q *Queries) Close() error {
 	if q.checkEmailStmt != nil {
 		if cerr := q.checkEmailStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing checkEmailStmt: %w", cerr)
+		}
+	}
+	if q.getAllCandidatesStmt != nil {
+		if cerr := q.getAllCandidatesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getAllCandidatesStmt: %w", cerr)
+		}
+	}
+	if q.getTotalUsersNumStmt != nil {
+		if cerr := q.getTotalUsersNumStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getTotalUsersNumStmt: %w", cerr)
 		}
 	}
 	if q.getUserStmt != nil {
@@ -89,6 +111,16 @@ func (q *Queries) Close() error {
 	if q.seedAdminStmt != nil {
 		if cerr := q.seedAdminStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing seedAdminStmt: %w", cerr)
+		}
+	}
+	if q.totalVotedVotersStmt != nil {
+		if cerr := q.totalVotedVotersStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing totalVotedVotersStmt: %w", cerr)
+		}
+	}
+	if q.totalVotersNumStmt != nil {
+		if cerr := q.totalVotersNumStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing totalVotersNumStmt: %w", cerr)
 		}
 	}
 	if q.updateUserStmt != nil {
@@ -141,12 +173,16 @@ type Queries struct {
 	db                     DBTX
 	tx                     *sql.Tx
 	checkEmailStmt         *sql.Stmt
+	getAllCandidatesStmt   *sql.Stmt
+	getTotalUsersNumStmt   *sql.Stmt
 	getUserStmt            *sql.Stmt
 	getUserByEmailStmt     *sql.Stmt
 	registerContestantStmt *sql.Stmt
 	registerUserStmt       *sql.Stmt
 	registerVoterStmt      *sql.Stmt
 	seedAdminStmt          *sql.Stmt
+	totalVotedVotersStmt   *sql.Stmt
+	totalVotersNumStmt     *sql.Stmt
 	updateUserStmt         *sql.Stmt
 	updateVoterStmt        *sql.Stmt
 }
@@ -156,12 +192,16 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		db:                     tx,
 		tx:                     tx,
 		checkEmailStmt:         q.checkEmailStmt,
+		getAllCandidatesStmt:   q.getAllCandidatesStmt,
+		getTotalUsersNumStmt:   q.getTotalUsersNumStmt,
 		getUserStmt:            q.getUserStmt,
 		getUserByEmailStmt:     q.getUserByEmailStmt,
 		registerContestantStmt: q.registerContestantStmt,
 		registerUserStmt:       q.registerUserStmt,
 		registerVoterStmt:      q.registerVoterStmt,
 		seedAdminStmt:          q.seedAdminStmt,
+		totalVotedVotersStmt:   q.totalVotedVotersStmt,
+		totalVotersNumStmt:     q.totalVotersNumStmt,
 		updateUserStmt:         q.updateUserStmt,
 		updateVoterStmt:        q.updateVoterStmt,
 	}
