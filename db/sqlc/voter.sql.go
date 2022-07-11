@@ -36,8 +36,30 @@ func (q *Queries) RegisterVoter(ctx context.Context, arg RegisterVoterParams) (u
 	return id, err
 }
 
+const totalVotedVoters = `-- name: TotalVotedVoters :one
+SELECT COUNT(email) FROM voters WHERE voted = true
+`
+
+func (q *Queries) TotalVotedVoters(ctx context.Context) (int64, error) {
+	row := q.queryRow(ctx, q.totalVotedVotersStmt, totalVotedVoters)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const totalVotersNum = `-- name: TotalVotersNum :one
+SELECT COUNT(email) FROM voters
+`
+
+func (q *Queries) TotalVotersNum(ctx context.Context) (int64, error) {
+	row := q.queryRow(ctx, q.totalVotersNumStmt, totalVotersNum)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const updateVoter = `-- name: UpdateVoter :one
-UPDATE voters SET email = $1 WHERE email=$2 RETURNING id, full_name, email, registered_at, voted_at, voters_public_address
+UPDATE voters SET email = $1 WHERE email=$2 RETURNING id, full_name, email, registered_at, voted_at, voted, voters_public_address
 `
 
 type UpdateVoterParams struct {
@@ -54,6 +76,7 @@ func (q *Queries) UpdateVoter(ctx context.Context, arg UpdateVoterParams) (Voter
 		&i.Email,
 		&i.RegisteredAt,
 		&i.VotedAt,
+		&i.Voted,
 		&i.VotersPublicAddress,
 	)
 	return i, err
