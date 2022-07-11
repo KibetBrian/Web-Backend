@@ -15,7 +15,6 @@ func TestRegisterCandidate(t *testing.T) {
 	newCandidate := RegisterContestantParams{
 		FullName: user.FullName,
 		Email: user.Email,
-		Password: utils.GenerateRandomPassword(6, 18),
 		Position: positions[utils.GenerateRandInt(0,len-1)],
 		Description: utils.RandomSentenceGenerator(),
 	}
