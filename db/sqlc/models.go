@@ -40,20 +40,24 @@ type Admin struct {
 }
 
 type Contestant struct {
-	ID           uuid.UUID    `json:"id"`
-	FullName     string       `json:"fullName"`
-	Email        string       `json:"email"`
-	Password     string       `json:"password"`
-	Position     string       `json:"position"`
-	RegisteredAt sql.NullTime `json:"registeredAt"`
-	Description  string       `json:"description"`
+	ID               uuid.UUID    `json:"id"`
+	FullName         string       `json:"fullName"`
+	Email            string       `json:"email"`
+	Position         string       `json:"position"`
+	RegisteredAt     sql.NullTime `json:"registeredAt"`
+	Description      string       `json:"description"`
+	Region           string       `json:"region"`
+	EthereumAddress  string       `json:"ethereumAddress"`
+	NationalIDNumber int64        `json:"nationalIDNumber"`
+	ImageAddress     string       `json:"imageAddress"`
 }
 
 type User struct {
-	ID       uuid.UUID `json:"id"`
-	FullName string    `json:"fullName"`
-	Email    string    `json:"email"`
-	Password string    `json:"password"`
+	ID       uuid.UUID    `json:"id"`
+	FullName string       `json:"fullName"`
+	Email    string       `json:"email"`
+	Password string       `json:"password"`
+	IsAdmin  sql.NullBool `json:"isAdmin"`
 }
 
 type Voter struct {
@@ -62,5 +66,6 @@ type Voter struct {
 	Email               string       `json:"email"`
 	RegisteredAt        time.Time    `json:"registeredAt"`
 	VotedAt             sql.NullTime `json:"votedAt"`
+	Voted               sql.NullBool `json:"voted"`
 	VotersPublicAddress string       `json:"votersPublicAddress"`
 }
