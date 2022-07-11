@@ -9,36 +9,83 @@ import (
 	"context"
 )
 
+const getAllCandidates = `-- name: GetAllCandidates :many
+SELECT id, full_name, email, position, registered_at, description, region, ethereum_address, national_id_number, image_address FROM contestants
+`
+
+func (q *Queries) GetAllCandidates(ctx context.Context) ([]Contestant, error) {
+	rows, err := q.query(ctx, q.getAllCandidatesStmt, getAllCandidates)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Contestant
+	for rows.Next() {
+		var i Contestant
+		if err := rows.Scan(
+			&i.ID,
+			&i.FullName,
+			&i.Email,
+			&i.Position,
+			&i.RegisteredAt,
+			&i.Description,
+			&i.Region,
+			&i.EthereumAddress,
+			&i.NationalIDNumber,
+			&i.ImageAddress,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const registerContestant = `-- name: RegisterContestant :one
-INSERT INTO contestants(full_name,email,password,position, description)
-VALUES ($1,$2,$3,$4, $5) RETURNING id, full_name, email, password, position, registered_at, description
+INSERT INTO contestants(full_name,email,position, description, region,ethereum_address,national_id_number, image_address)
+VALUES ($1,$2,$3,$4,$5, $6,$7,$8) RETURNING id, full_name, email, position, registered_at, description, region, ethereum_address, national_id_number, image_address
 `
 
 type RegisterContestantParams struct {
-	FullName    string `json:"fullName"`
-	Email       string `json:"email"`
-	Password    string `json:"password"`
-	Position    string `json:"position"`
-	Description string `json:"description"`
+	FullName         string `json:"fullName"`
+	Email            string `json:"email"`
+	Position         string `json:"position"`
+	Description      string `json:"description"`
+	Region           string `json:"region"`
+	EthereumAddress  string `json:"ethereumAddress"`
+	NationalIDNumber int64  `json:"nationalIDNumber"`
+	ImageAddress     string `json:"imageAddress"`
 }
 
 func (q *Queries) RegisterContestant(ctx context.Context, arg RegisterContestantParams) (Contestant, error) {
 	row := q.queryRow(ctx, q.registerContestantStmt, registerContestant,
 		arg.FullName,
 		arg.Email,
-		arg.Password,
 		arg.Position,
 		arg.Description,
+		arg.Region,
+		arg.EthereumAddress,
+		arg.NationalIDNumber,
+		arg.ImageAddress,
 	)
 	var i Contestant
 	err := row.Scan(
 		&i.ID,
 		&i.FullName,
 		&i.Email,
-		&i.Password,
 		&i.Position,
 		&i.RegisteredAt,
 		&i.Description,
+		&i.Region,
+		&i.EthereumAddress,
+		&i.NationalIDNumber,
+		&i.ImageAddress,
 	)
 	return i, err
 }
