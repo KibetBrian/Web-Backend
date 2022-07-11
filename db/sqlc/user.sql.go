@@ -27,8 +27,19 @@ func (q *Queries) CheckEmail(ctx context.Context, email string) (CheckEmailRow, 
 	return i, err
 }
 
+const getTotalUsersNum = `-- name: GetTotalUsersNum :one
+SELECT COUNT(email) FROM users
+`
+
+func (q *Queries) GetTotalUsersNum(ctx context.Context) (int64, error) {
+	row := q.queryRow(ctx, q.getTotalUsersNumStmt, getTotalUsersNum)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const getUser = `-- name: GetUser :one
-SELECT id, full_name, email, password FROM users WHERE id=$1
+SELECT id, full_name, email, password, is_admin FROM users WHERE id=$1
 `
 
 func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
@@ -39,12 +50,13 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.FullName,
 		&i.Email,
 		&i.Password,
+		&i.IsAdmin,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, full_name, email, password FROM users WHERE email = $1
+SELECT id, full_name, email, password, is_admin FROM users WHERE email = $1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
@@ -55,13 +67,14 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.FullName,
 		&i.Email,
 		&i.Password,
+		&i.IsAdmin,
 	)
 	return i, err
 }
 
 const registerUser = `-- name: RegisterUser :one
 INSERT INTO users (full_name, email, password)
-VALUES($1, $2, $3) RETURNING id, full_name, email, password
+VALUES($1, $2, $3) RETURNING id, full_name, email, password, is_admin
 `
 
 type RegisterUserParams struct {
@@ -78,12 +91,13 @@ func (q *Queries) RegisterUser(ctx context.Context, arg RegisterUserParams) (Use
 		&i.FullName,
 		&i.Email,
 		&i.Password,
+		&i.IsAdmin,
 	)
 	return i, err
 }
 
 const updateUser = `-- name: UpdateUser :one
-UPDATE users SET email = $1, password = $2 WHERE email = $3 RETURNING id, full_name, email, password
+UPDATE users SET email = $1, password = $2 WHERE email = $3 RETURNING id, full_name, email, password, is_admin
 `
 
 type UpdateUserParams struct {
@@ -100,6 +114,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.FullName,
 		&i.Email,
 		&i.Password,
+		&i.IsAdmin,
 	)
 	return i, err
 }
