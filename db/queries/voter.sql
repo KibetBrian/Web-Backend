@@ -5,3 +5,9 @@ VALUES($1,$2,$3,$4) RETURNING id;
 -- name: UpdateVoter :one
 UPDATE voters SET email = $1 WHERE email=$2 RETURNING *;
 
+-- name: TotalVotersNum :one
+SELECT COUNT(email) FROM voters;
+
+-- name: TotalVotedVoters :one 
+SELECT COUNT(email) FROM voters WHERE voted = true;
+
