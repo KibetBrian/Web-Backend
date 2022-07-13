@@ -20,6 +20,13 @@ func NewServer() *Server{
 	server.router.GET("/user/total", server.GetTotalUsersNum)
 	server.router.GET("/voter/voted", server.GetTotalVotedVoters)
 	server.router.GET("/candidates", server.GetAllContestants)
+	server.router.GET("/candidates/presidential", server.GetPresidentContestants)
+	server.router.GET("/candidates/gubernatorial", server.GetGorvenorContestants)
+	server.router.POST("/voter/confirm", server.ConfirmVoter)
+	server.router.POST("/voter/reject", server.RejectVoter)
+	server.router.GET("/voter/pending", server.GetPendingVoters)
+	server.router.GET("/voter/registered", server.GetTotalRegisteredVoters)
+
 
 	return server;
 }

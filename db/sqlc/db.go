@@ -27,8 +27,20 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.checkEmailStmt, err = db.PrepareContext(ctx, checkEmail); err != nil {
 		return nil, fmt.Errorf("error preparing query CheckEmail: %w", err)
 	}
+	if q.deleteVoterStmt, err = db.PrepareContext(ctx, deleteVoter); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteVoter: %w", err)
+	}
+	if q.getAddressStmt, err = db.PrepareContext(ctx, getAddress); err != nil {
+		return nil, fmt.Errorf("error preparing query GetAddress: %w", err)
+	}
 	if q.getAllCandidatesStmt, err = db.PrepareContext(ctx, getAllCandidates); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAllCandidates: %w", err)
+	}
+	if q.getGubernatorialCandidatesStmt, err = db.PrepareContext(ctx, getGubernatorialCandidates); err != nil {
+		return nil, fmt.Errorf("error preparing query GetGubernatorialCandidates: %w", err)
+	}
+	if q.getPresidentialCandidatesStmt, err = db.PrepareContext(ctx, getPresidentialCandidates); err != nil {
+		return nil, fmt.Errorf("error preparing query GetPresidentialCandidates: %w", err)
 	}
 	if q.getTotalUsersNumStmt, err = db.PrepareContext(ctx, getTotalUsersNum); err != nil {
 		return nil, fmt.Errorf("error preparing query GetTotalUsersNum: %w", err)
@@ -38,6 +50,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getUserByEmailStmt, err = db.PrepareContext(ctx, getUserByEmail); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUserByEmail: %w", err)
+	}
+	if q.pendingVotersStmt, err = db.PrepareContext(ctx, pendingVoters); err != nil {
+		return nil, fmt.Errorf("error preparing query PendingVoters: %w", err)
 	}
 	if q.registerContestantStmt, err = db.PrepareContext(ctx, registerContestant); err != nil {
 		return nil, fmt.Errorf("error preparing query RegisterContestant: %w", err)
@@ -57,11 +72,20 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.totalVotersNumStmt, err = db.PrepareContext(ctx, totalVotersNum); err != nil {
 		return nil, fmt.Errorf("error preparing query TotalVotersNum: %w", err)
 	}
+	if q.updatePendingStateStmt, err = db.PrepareContext(ctx, updatePendingState); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdatePendingState: %w", err)
+	}
+	if q.updateRegisterationStateStmt, err = db.PrepareContext(ctx, updateRegisterationState); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateRegisterationState: %w", err)
+	}
 	if q.updateUserStmt, err = db.PrepareContext(ctx, updateUser); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateUser: %w", err)
 	}
 	if q.updateVoterStmt, err = db.PrepareContext(ctx, updateVoter); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateVoter: %w", err)
+	}
+	if q.verifiedVotersStmt, err = db.PrepareContext(ctx, verifiedVoters); err != nil {
+		return nil, fmt.Errorf("error preparing query VerifiedVoters: %w", err)
 	}
 	return &q, nil
 }
@@ -73,9 +97,29 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing checkEmailStmt: %w", cerr)
 		}
 	}
+	if q.deleteVoterStmt != nil {
+		if cerr := q.deleteVoterStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteVoterStmt: %w", cerr)
+		}
+	}
+	if q.getAddressStmt != nil {
+		if cerr := q.getAddressStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getAddressStmt: %w", cerr)
+		}
+	}
 	if q.getAllCandidatesStmt != nil {
 		if cerr := q.getAllCandidatesStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getAllCandidatesStmt: %w", cerr)
+		}
+	}
+	if q.getGubernatorialCandidatesStmt != nil {
+		if cerr := q.getGubernatorialCandidatesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getGubernatorialCandidatesStmt: %w", cerr)
+		}
+	}
+	if q.getPresidentialCandidatesStmt != nil {
+		if cerr := q.getPresidentialCandidatesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getPresidentialCandidatesStmt: %w", cerr)
 		}
 	}
 	if q.getTotalUsersNumStmt != nil {
@@ -91,6 +135,11 @@ func (q *Queries) Close() error {
 	if q.getUserByEmailStmt != nil {
 		if cerr := q.getUserByEmailStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getUserByEmailStmt: %w", cerr)
+		}
+	}
+	if q.pendingVotersStmt != nil {
+		if cerr := q.pendingVotersStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing pendingVotersStmt: %w", cerr)
 		}
 	}
 	if q.registerContestantStmt != nil {
@@ -123,6 +172,16 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing totalVotersNumStmt: %w", cerr)
 		}
 	}
+	if q.updatePendingStateStmt != nil {
+		if cerr := q.updatePendingStateStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updatePendingStateStmt: %w", cerr)
+		}
+	}
+	if q.updateRegisterationStateStmt != nil {
+		if cerr := q.updateRegisterationStateStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateRegisterationStateStmt: %w", cerr)
+		}
+	}
 	if q.updateUserStmt != nil {
 		if cerr := q.updateUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateUserStmt: %w", cerr)
@@ -131,6 +190,11 @@ func (q *Queries) Close() error {
 	if q.updateVoterStmt != nil {
 		if cerr := q.updateVoterStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateVoterStmt: %w", cerr)
+		}
+	}
+	if q.verifiedVotersStmt != nil {
+		if cerr := q.verifiedVotersStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing verifiedVotersStmt: %w", cerr)
 		}
 	}
 	return err
@@ -170,39 +234,55 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                     DBTX
-	tx                     *sql.Tx
-	checkEmailStmt         *sql.Stmt
-	getAllCandidatesStmt   *sql.Stmt
-	getTotalUsersNumStmt   *sql.Stmt
-	getUserStmt            *sql.Stmt
-	getUserByEmailStmt     *sql.Stmt
-	registerContestantStmt *sql.Stmt
-	registerUserStmt       *sql.Stmt
-	registerVoterStmt      *sql.Stmt
-	seedAdminStmt          *sql.Stmt
-	totalVotedVotersStmt   *sql.Stmt
-	totalVotersNumStmt     *sql.Stmt
-	updateUserStmt         *sql.Stmt
-	updateVoterStmt        *sql.Stmt
+	db                             DBTX
+	tx                             *sql.Tx
+	checkEmailStmt                 *sql.Stmt
+	deleteVoterStmt                *sql.Stmt
+	getAddressStmt                 *sql.Stmt
+	getAllCandidatesStmt           *sql.Stmt
+	getGubernatorialCandidatesStmt *sql.Stmt
+	getPresidentialCandidatesStmt  *sql.Stmt
+	getTotalUsersNumStmt           *sql.Stmt
+	getUserStmt                    *sql.Stmt
+	getUserByEmailStmt             *sql.Stmt
+	pendingVotersStmt              *sql.Stmt
+	registerContestantStmt         *sql.Stmt
+	registerUserStmt               *sql.Stmt
+	registerVoterStmt              *sql.Stmt
+	seedAdminStmt                  *sql.Stmt
+	totalVotedVotersStmt           *sql.Stmt
+	totalVotersNumStmt             *sql.Stmt
+	updatePendingStateStmt         *sql.Stmt
+	updateRegisterationStateStmt   *sql.Stmt
+	updateUserStmt                 *sql.Stmt
+	updateVoterStmt                *sql.Stmt
+	verifiedVotersStmt             *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                     tx,
-		tx:                     tx,
-		checkEmailStmt:         q.checkEmailStmt,
-		getAllCandidatesStmt:   q.getAllCandidatesStmt,
-		getTotalUsersNumStmt:   q.getTotalUsersNumStmt,
-		getUserStmt:            q.getUserStmt,
-		getUserByEmailStmt:     q.getUserByEmailStmt,
-		registerContestantStmt: q.registerContestantStmt,
-		registerUserStmt:       q.registerUserStmt,
-		registerVoterStmt:      q.registerVoterStmt,
-		seedAdminStmt:          q.seedAdminStmt,
-		totalVotedVotersStmt:   q.totalVotedVotersStmt,
-		totalVotersNumStmt:     q.totalVotersNumStmt,
-		updateUserStmt:         q.updateUserStmt,
-		updateVoterStmt:        q.updateVoterStmt,
+		db:                             tx,
+		tx:                             tx,
+		checkEmailStmt:                 q.checkEmailStmt,
+		deleteVoterStmt:                q.deleteVoterStmt,
+		getAddressStmt:                 q.getAddressStmt,
+		getAllCandidatesStmt:           q.getAllCandidatesStmt,
+		getGubernatorialCandidatesStmt: q.getGubernatorialCandidatesStmt,
+		getPresidentialCandidatesStmt:  q.getPresidentialCandidatesStmt,
+		getTotalUsersNumStmt:           q.getTotalUsersNumStmt,
+		getUserStmt:                    q.getUserStmt,
+		getUserByEmailStmt:             q.getUserByEmailStmt,
+		pendingVotersStmt:              q.pendingVotersStmt,
+		registerContestantStmt:         q.registerContestantStmt,
+		registerUserStmt:               q.registerUserStmt,
+		registerVoterStmt:              q.registerVoterStmt,
+		seedAdminStmt:                  q.seedAdminStmt,
+		totalVotedVotersStmt:           q.totalVotedVotersStmt,
+		totalVotersNumStmt:             q.totalVotersNumStmt,
+		updatePendingStateStmt:         q.updatePendingStateStmt,
+		updateRegisterationStateStmt:   q.updateRegisterationStateStmt,
+		updateUserStmt:                 q.updateUserStmt,
+		updateVoterStmt:                q.updateVoterStmt,
+		verifiedVotersStmt:             q.verifiedVotersStmt,
 	}
 }

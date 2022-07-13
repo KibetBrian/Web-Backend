@@ -7,29 +7,114 @@ package db
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
 )
 
+const deleteVoter = `-- name: DeleteVoter :one
+DELETE FROM voters WHERE ethereum_address = $1 RETURNING id, full_name, email, registered_at, voted, verified, national_id_number, image_address, ethereum_address, region
+`
+
+func (q *Queries) DeleteVoter(ctx context.Context, ethereumAddress string) (Voter, error) {
+	row := q.queryRow(ctx, q.deleteVoterStmt, deleteVoter, ethereumAddress)
+	var i Voter
+	err := row.Scan(
+		&i.ID,
+		&i.FullName,
+		&i.Email,
+		&i.RegisteredAt,
+		&i.Voted,
+		&i.Verified,
+		&i.NationalIDNumber,
+		&i.ImageAddress,
+		&i.EthereumAddress,
+		&i.Region,
+	)
+	return i, err
+}
+
+const getAddress = `-- name: GetAddress :one
+SELECT id, full_name, email, registered_at, voted, verified, national_id_number, image_address, ethereum_address, region FROM voters WHERE ethereum_address = $1
+`
+
+func (q *Queries) GetAddress(ctx context.Context, ethereumAddress string) (Voter, error) {
+	row := q.queryRow(ctx, q.getAddressStmt, getAddress, ethereumAddress)
+	var i Voter
+	err := row.Scan(
+		&i.ID,
+		&i.FullName,
+		&i.Email,
+		&i.RegisteredAt,
+		&i.Voted,
+		&i.Verified,
+		&i.NationalIDNumber,
+		&i.ImageAddress,
+		&i.EthereumAddress,
+		&i.Region,
+	)
+	return i, err
+}
+
+const pendingVoters = `-- name: PendingVoters :many
+SELECT id, full_name, email, registered_at, voted, verified, national_id_number, image_address, ethereum_address, region FROM voters WHERE verified = false
+`
+
+func (q *Queries) PendingVoters(ctx context.Context) ([]Voter, error) {
+	rows, err := q.query(ctx, q.pendingVotersStmt, pendingVoters)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Voter
+	for rows.Next() {
+		var i Voter
+		if err := rows.Scan(
+			&i.ID,
+			&i.FullName,
+			&i.Email,
+			&i.RegisteredAt,
+			&i.Voted,
+			&i.Verified,
+			&i.NationalIDNumber,
+			&i.ImageAddress,
+			&i.EthereumAddress,
+			&i.Region,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const registerVoter = `-- name: RegisterVoter :one
-INSERT INTO voters(full_name, email, registered_at,voters_public_address)
-VALUES($1,$2,$3,$4) RETURNING id
+INSERT INTO voters(full_name, email,national_id_number,image_address,ethereum_address, region)
+VALUES($1,$2,$3,$4,$5, $6) RETURNING id
 `
 
 type RegisterVoterParams struct {
-	FullName            string    `json:"fullName"`
-	Email               string    `json:"email"`
-	RegisteredAt        time.Time `json:"registeredAt"`
-	VotersPublicAddress string    `json:"votersPublicAddress"`
+	FullName         string `json:"fullName"`
+	Email            string `json:"email"`
+	NationalIDNumber int64  `json:"nationalIDNumber"`
+	ImageAddress     string `json:"imageAddress"`
+	EthereumAddress  string `json:"ethereumAddress"`
+	Region           string `json:"region"`
 }
 
 func (q *Queries) RegisterVoter(ctx context.Context, arg RegisterVoterParams) (uuid.UUID, error) {
 	row := q.queryRow(ctx, q.registerVoterStmt, registerVoter,
 		arg.FullName,
 		arg.Email,
-		arg.RegisteredAt,
-		arg.VotersPublicAddress,
+		arg.NationalIDNumber,
+		arg.ImageAddress,
+		arg.EthereumAddress,
+		arg.Region,
 	)
 	var id uuid.UUID
 	err := row.Scan(&id)
@@ -48,7 +133,7 @@ func (q *Queries) TotalVotedVoters(ctx context.Context) (int64, error) {
 }
 
 const totalVotersNum = `-- name: TotalVotersNum :one
-SELECT COUNT(email) FROM voters
+SELECT COUNT(email) FROM voters WHERE verified= true
 `
 
 func (q *Queries) TotalVotersNum(ctx context.Context) (int64, error) {
@@ -58,8 +143,30 @@ func (q *Queries) TotalVotersNum(ctx context.Context) (int64, error) {
 	return count, err
 }
 
+const updatePendingState = `-- name: UpdatePendingState :one
+UPDATE voters SET verified = true WHERE ethereum_address = $1 RETURNING id, full_name, email, registered_at, voted, verified, national_id_number, image_address, ethereum_address, region
+`
+
+func (q *Queries) UpdatePendingState(ctx context.Context, ethereumAddress string) (Voter, error) {
+	row := q.queryRow(ctx, q.updatePendingStateStmt, updatePendingState, ethereumAddress)
+	var i Voter
+	err := row.Scan(
+		&i.ID,
+		&i.FullName,
+		&i.Email,
+		&i.RegisteredAt,
+		&i.Voted,
+		&i.Verified,
+		&i.NationalIDNumber,
+		&i.ImageAddress,
+		&i.EthereumAddress,
+		&i.Region,
+	)
+	return i, err
+}
+
 const updateVoter = `-- name: UpdateVoter :one
-UPDATE voters SET email = $1 WHERE email=$2 RETURNING id, full_name, email, registered_at, voted_at, voted, voters_public_address
+UPDATE voters SET email = $1 WHERE email=$2 RETURNING id, full_name, email, registered_at, voted, verified, national_id_number, image_address, ethereum_address, region
 `
 
 type UpdateVoterParams struct {
@@ -75,9 +182,50 @@ func (q *Queries) UpdateVoter(ctx context.Context, arg UpdateVoterParams) (Voter
 		&i.FullName,
 		&i.Email,
 		&i.RegisteredAt,
-		&i.VotedAt,
 		&i.Voted,
-		&i.VotersPublicAddress,
+		&i.Verified,
+		&i.NationalIDNumber,
+		&i.ImageAddress,
+		&i.EthereumAddress,
+		&i.Region,
 	)
 	return i, err
+}
+
+const verifiedVoters = `-- name: VerifiedVoters :many
+SELECT id, full_name, email, registered_at, voted, verified, national_id_number, image_address, ethereum_address, region FROM voters WHERE verified = true
+`
+
+func (q *Queries) VerifiedVoters(ctx context.Context) ([]Voter, error) {
+	rows, err := q.query(ctx, q.verifiedVotersStmt, verifiedVoters)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Voter
+	for rows.Next() {
+		var i Voter
+		if err := rows.Scan(
+			&i.ID,
+			&i.FullName,
+			&i.Email,
+			&i.RegisteredAt,
+			&i.Voted,
+			&i.Verified,
+			&i.NationalIDNumber,
+			&i.ImageAddress,
+			&i.EthereumAddress,
+			&i.Region,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

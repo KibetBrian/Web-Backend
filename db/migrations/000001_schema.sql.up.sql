@@ -10,7 +10,9 @@ CREATE TABLE "users" (
   "full_name" varchar NOT NULL,
   "email" varchar UNIQUE NOT NULL,
   "password" varchar NOT NULL,
-  "is_admin" boolean DEFAULT 'FALSE'
+  "is_admin" boolean DEFAULT 'FALSE',
+  "image_address" varchar,
+  "registered_voter" boolean DEFAULT 'FALSE'
 );
 
 CREATE TABLE "voters" (
@@ -18,9 +20,12 @@ CREATE TABLE "voters" (
   "full_name" varchar NOT NULL,
   "email" varchar NOT NULL,
   "registered_at" timestamptz PRIMARY KEY NOT NULL DEFAULT 'now()',
-  "voted_at" timestamptz,
-  "voted" boolean,
-  "voters_public_address" varchar NOT NULL
+  "voted" boolean DEFAULT 'FALSE',
+  "verified" boolean DEFAULT 'FALSE',
+  "national_id_number" bigint NOT NULL,
+  "image_address" varchar UNIQUE NOT NULL,
+  "ethereum_address" varchar NOT NULL,
+  "region" varchar NOT NULL
 );
 
 CREATE TABLE "admins" (
@@ -39,7 +44,7 @@ CREATE TABLE "contestants" (
   "registered_at" timestamptz DEFAULT 'now()',
   "description" varchar NOT NULL,
   "region" varchar NOT NULL,
-  "ethereum_address" varchar NOT NULL,
+  "ethereum_address" varchar UNIQUE NOT NULL,
   "national_id_number" bigint NOT NULL,
   "image_address" varchar NOT NULL
 );
@@ -51,5 +56,3 @@ CREATE INDEX ON "contestants" ("full_name");
 ALTER TABLE "voters" ADD FOREIGN KEY ("email") REFERENCES "users" ("email");
 
 ALTER TABLE "admins" ADD FOREIGN KEY ("email") REFERENCES "users" ("email");
-
-ALTER TABLE "contestants" ADD FOREIGN KEY ("email") REFERENCES "users" ("email");

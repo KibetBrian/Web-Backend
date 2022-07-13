@@ -17,3 +17,6 @@ SELECT * FROM users WHERE email = $1;
 -- name: GetTotalUsersNum :one
 SELECT COUNT(email) FROM users;
 
+-- name: UpdateRegisterationState :one
+UPDATE users SET registered_voter = true RETURNING *;
+

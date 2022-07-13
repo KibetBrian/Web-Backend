@@ -47,6 +47,82 @@ func (q *Queries) GetAllCandidates(ctx context.Context) ([]Contestant, error) {
 	return items, nil
 }
 
+const getGubernatorialCandidates = `-- name: GetGubernatorialCandidates :many
+SELECT id, full_name, email, position, registered_at, description, region, ethereum_address, national_id_number, image_address FROM contestants WHERE position = 'governor'
+`
+
+func (q *Queries) GetGubernatorialCandidates(ctx context.Context) ([]Contestant, error) {
+	rows, err := q.query(ctx, q.getGubernatorialCandidatesStmt, getGubernatorialCandidates)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Contestant
+	for rows.Next() {
+		var i Contestant
+		if err := rows.Scan(
+			&i.ID,
+			&i.FullName,
+			&i.Email,
+			&i.Position,
+			&i.RegisteredAt,
+			&i.Description,
+			&i.Region,
+			&i.EthereumAddress,
+			&i.NationalIDNumber,
+			&i.ImageAddress,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPresidentialCandidates = `-- name: GetPresidentialCandidates :many
+SELECT id, full_name, email, position, registered_at, description, region, ethereum_address, national_id_number, image_address FROM contestants WHERE position = 'president'
+`
+
+func (q *Queries) GetPresidentialCandidates(ctx context.Context) ([]Contestant, error) {
+	rows, err := q.query(ctx, q.getPresidentialCandidatesStmt, getPresidentialCandidates)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Contestant
+	for rows.Next() {
+		var i Contestant
+		if err := rows.Scan(
+			&i.ID,
+			&i.FullName,
+			&i.Email,
+			&i.Position,
+			&i.RegisteredAt,
+			&i.Description,
+			&i.Region,
+			&i.EthereumAddress,
+			&i.NationalIDNumber,
+			&i.ImageAddress,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const registerContestant = `-- name: RegisterContestant :one
 INSERT INTO contestants(full_name,email,position, description, region,ethereum_address,national_id_number, image_address)
 VALUES ($1,$2,$3,$4,$5, $6,$7,$8) RETURNING id, full_name, email, position, registered_at, description, region, ethereum_address, national_id_number, image_address
