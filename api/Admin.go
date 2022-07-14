@@ -141,7 +141,7 @@ func (s *Server) ConfirmVoter(c *gin.Context){
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"BlockchainResult: ":jsonRes, "DbResult: ":voter, "RegisteredVoterUser":user})
+	c.JSON(http.StatusOK, gin.H{"BlockchainResult: ":jsonRes, "DbResult: ":voter, "RegisteredVoterUser":user, "Success":true})
 }
 
 func (s *Server) RejectVoter(c *gin.Context){

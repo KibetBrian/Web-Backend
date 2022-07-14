@@ -39,7 +39,7 @@ func (q *Queries) GetTotalUsersNum(ctx context.Context) (int64, error) {
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, full_name, email, password, is_admin, image_address, registered_voter FROM users WHERE id=$1
+SELECT id, full_name, email, password, is_admin, image_address, voted_president, voted_governor, registered_voter FROM users WHERE id=$1
 `
 
 func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
@@ -52,13 +52,15 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.Password,
 		&i.IsAdmin,
 		&i.ImageAddress,
+		&i.VotedPresident,
+		&i.VotedGovernor,
 		&i.RegisteredVoter,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, full_name, email, password, is_admin, image_address, registered_voter FROM users WHERE email = $1
+SELECT id, full_name, email, password, is_admin, image_address, voted_president, voted_governor, registered_voter FROM users WHERE email = $1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
@@ -71,6 +73,8 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.Password,
 		&i.IsAdmin,
 		&i.ImageAddress,
+		&i.VotedPresident,
+		&i.VotedGovernor,
 		&i.RegisteredVoter,
 	)
 	return i, err
@@ -78,7 +82,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 
 const registerUser = `-- name: RegisterUser :one
 INSERT INTO users (full_name, email, password)
-VALUES($1, $2, $3) RETURNING id, full_name, email, password, is_admin, image_address, registered_voter
+VALUES($1, $2, $3) RETURNING id, full_name, email, password, is_admin, image_address, voted_president, voted_governor, registered_voter
 `
 
 type RegisterUserParams struct {
@@ -97,13 +101,15 @@ func (q *Queries) RegisterUser(ctx context.Context, arg RegisterUserParams) (Use
 		&i.Password,
 		&i.IsAdmin,
 		&i.ImageAddress,
+		&i.VotedPresident,
+		&i.VotedGovernor,
 		&i.RegisteredVoter,
 	)
 	return i, err
 }
 
 const updateRegisterationState = `-- name: UpdateRegisterationState :one
-UPDATE users SET registered_voter = true RETURNING id, full_name, email, password, is_admin, image_address, registered_voter
+UPDATE users SET registered_voter = true RETURNING id, full_name, email, password, is_admin, image_address, voted_president, voted_governor, registered_voter
 `
 
 func (q *Queries) UpdateRegisterationState(ctx context.Context) (User, error) {
@@ -116,13 +122,15 @@ func (q *Queries) UpdateRegisterationState(ctx context.Context) (User, error) {
 		&i.Password,
 		&i.IsAdmin,
 		&i.ImageAddress,
+		&i.VotedPresident,
+		&i.VotedGovernor,
 		&i.RegisteredVoter,
 	)
 	return i, err
 }
 
 const updateUser = `-- name: UpdateUser :one
-UPDATE users SET email = $1, password = $2 WHERE email = $3 RETURNING id, full_name, email, password, is_admin, image_address, registered_voter
+UPDATE users SET email = $1, password = $2 WHERE email = $3 RETURNING id, full_name, email, password, is_admin, image_address, voted_president, voted_governor, registered_voter
 `
 
 type UpdateUserParams struct {
@@ -141,6 +149,8 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.Password,
 		&i.IsAdmin,
 		&i.ImageAddress,
+		&i.VotedPresident,
+		&i.VotedGovernor,
 		&i.RegisteredVoter,
 	)
 	return i, err

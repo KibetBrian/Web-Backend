@@ -59,6 +59,8 @@ type User struct {
 	Password        string         `json:"password"`
 	IsAdmin         sql.NullBool   `json:"isAdmin"`
 	ImageAddress    sql.NullString `json:"imageAddress"`
+	VotedPresident  sql.NullBool   `json:"votedPresident"`
+	VotedGovernor   sql.NullBool   `json:"votedGovernor"`
 	RegisteredVoter sql.NullBool   `json:"registeredVoter"`
 }
 

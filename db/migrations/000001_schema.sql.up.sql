@@ -12,6 +12,8 @@ CREATE TABLE "users" (
   "password" varchar NOT NULL,
   "is_admin" boolean DEFAULT 'FALSE',
   "image_address" varchar,
+  "voted_president" boolean DEFAULT 'FALSE',
+  "voted_governor" boolean DEFAULT 'FALSE',
   "registered_voter" boolean DEFAULT 'FALSE'
 );
 

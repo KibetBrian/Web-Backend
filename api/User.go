@@ -31,6 +31,9 @@ type LoginResponse struct {
 	FullName string    `json:"fullName"`
 	Email    string    `json:"email"`
 	IsAdmin  bool      `json:"isAdmin"`
+	VotedPresident bool `json:"votedPresident"`
+	VotedGovernor bool `json:"votedGovernor"`
+	RegisteredVoter bool `json:"registeredVoter"`
 }
 
 func (s *Server) RegisterUser(ctx *gin.Context) {
@@ -123,6 +126,9 @@ func (s *Server) Login(c *gin.Context) {
 		FullName: user.FullName,
 		Email:    user.Email,
 		IsAdmin: user.IsAdmin.Bool,
+		RegisteredVoter: user.RegisteredVoter.Bool,
+		VotedPresident: user.VotedPresident.Bool,
+		VotedGovernor: user.VotedGovernor.Bool,
 	}
 	c.JSON(http.StatusOK, res)
 }
