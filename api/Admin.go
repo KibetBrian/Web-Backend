@@ -6,10 +6,13 @@ import (
 	"database/sql"
 	"encoding/json"
 	"io/ioutil"
+	"log"
+	"math/big"
 	"net/http"
 
 	db "github.com/KibetBrian/backend/db/sqlc"
 	"github.com/KibetBrian/backend/utils"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -33,6 +36,22 @@ type ContestantRegistrationRequest struct {
 	ImageAddress     string `json:"imageAddress" binding:"required"`
 	EthereumAddress  string `json:"ethereumAddress" binding:"required"`
 	NationalIdNumber int64  `json:"nationalIdNumber" binding:"required"`
+}
+
+type ElectionCandidate struct {
+	Name     string
+	Addr     common.Address
+	Position string
+	Votes    *big.Int
+}
+type ResultsResponse struct {
+	ID       uuid.UUID `json:"id"`
+	FullName string    `json:"fullName"`
+	Position string    `json:"position"`
+	Description string `json:"description"`
+	ImageAddress string `json:"imageAddress"`
+	Address  string    `json:"address"`
+	Votes    *big.Int  `json:"votes"`
 }
 
 type VoterChainParams struct {
@@ -64,41 +83,42 @@ func (s *Server) RegisterVoter(c *gin.Context) {
 		EthereumAddress:  req.VotersAddress,
 		NationalIDNumber: req.NationalIdNumber,
 		Region:           req.Region,
-		ImageAddress: req.ImageAddress,
+		ImageAddress:     req.ImageAddress,
 	}
 
 	voterId, err := s.db.RegisterVoter(context.Background(), arg)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrResponse(err.Error(),err))
+		c.JSON(http.StatusInternalServerError, utils.ErrResponse(err.Error(), err))
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"Message": "Voter Registered", "VoterId: ": voterId})
 }
-type VerifyVoter struct{
+
+type VerifyVoter struct {
 	EthereumAddress string `json:"ethereumAddress" binding:"required"`
 }
 
-func (s *Server) ConfirmVoter(c *gin.Context){
+func (s *Server) ConfirmVoter(c *gin.Context) {
 
-	var req VerifyVoter;
-	
+	var req VerifyVoter
+
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrResponse("Invalid parameters. Error: ", err))
 		return
 	}
 	//Check if address is registered or exists
-	voter, err := s.db.GetAddress(context.Background(),req.EthereumAddress)
-	if err!= nil {
-		if err == sql.ErrNoRows{
-			c.JSON(http.StatusNotFound, utils.ErrResponse("Voter not submitted data for registration", err));
+	voter, err := s.db.GetAddress(context.Background(), req.EthereumAddress)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusNotFound, utils.ErrResponse("Voter not submitted data for registration", err))
 			return
 		}
-		c.JSON(http.StatusInternalServerError, utils.ErrResponse("Failed to get data from the database", err));
+		c.JSON(http.StatusInternalServerError, utils.ErrResponse("Failed to get data from the database", err))
 		return
 	}
-	if voter.Verified.Bool{
-		c.JSON(http.StatusConflict, "Voter already registered");
+	if voter.Verified.Bool {
+		c.JSON(http.StatusConflict, "Voter already registered")
 		return
 	}
 
@@ -130,28 +150,28 @@ func (s *Server) ConfirmVoter(c *gin.Context){
 	}
 	ctx := context.Background()
 	voter, err = s.db.UpdatePendingState(ctx, req.EthereumAddress)
-	if err!=nil {
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 	//Update voter's data data on user table
-	user, err := s.db.UpdateRegisterationState(context.Background());
+	user, err := s.db.UpdateRegisterationState(context.Background())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"BlockchainResult: ":jsonRes, "DbResult: ":voter, "RegisteredVoterUser":user, "Success":true})
+	c.JSON(http.StatusOK, gin.H{"BlockchainResult: ": jsonRes, "DbResult: ": voter, "RegisteredVoterUser": user, "Success": true})
 }
 
-func (s *Server) RejectVoter(c *gin.Context){
+func (s *Server) RejectVoter(c *gin.Context) {
 	var req VerifyVoter
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.ErrResponse("Invalid parameters. Error: ", err))
 		return
 	}
-	ctx  := context.Background()
+	ctx := context.Background()
 	res, err := s.db.DeleteVoter(ctx, req.EthereumAddress)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Voter Deletion Failed", "error": err})
@@ -238,4 +258,63 @@ func (s *Server) RegisterContestant(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message:": "Contestant registered", "contestant": contestant})
+}
+
+func (s *Server) PresidentialResults(c *gin.Context) {
+	//Get all candidates
+	ctx := context.Background()
+	contestants, err := s.db.GetPresidentialCandidates(ctx)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, "Failed to get contestants")
+	}
+	if len(contestants) == 0 {
+		c.JSON(http.StatusAccepted, []db.Contestant{})
+	}
+
+	//Get array of address
+	addresses := []string{}
+	for _, v := range contestants {
+		addresses = append(addresses, v.EthereumAddress)
+	}
+
+	//make a post request to server bvs
+	const url = "http://127.0.0.1:8000/candidates/process"
+	const method = "POST"
+	const contentType = "application/json"
+
+	values := map[string][]string{
+		"candidatesAddresses": addresses,
+	}
+	jsonData, err := json.Marshal(values)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, "Failed to marshal values")
+		return
+	}
+	res, err := http.Post(url, contentType, bytes.NewBuffer(jsonData))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, "Failed to make a post request to blockchain client")
+		return
+	}
+	var jsonRes []ElectionCandidate
+	json.NewDecoder(res.Body).Decode(&jsonRes)
+
+	allContestants := []ResultsResponse{}
+	for _, v := range jsonRes {
+		ctx := context.Background()
+		data, err := s.db.GetCandidateByAddress(ctx, v.Addr.String())
+		if err != nil {
+			log.Fatalf("Error occured while retriving candidate by address")
+		}
+		newData := ResultsResponse{
+			ID: data.ID,
+			FullName: data.FullName,
+			Description: data.Description,
+			ImageAddress: data.ImageAddress,
+			Address:  data.EthereumAddress,
+			Position: data.Position,
+			Votes:    v.Votes,
+		}
+		allContestants = append(allContestants, newData)
+	}
+	c.JSON(http.StatusOK, allContestants)
 }
