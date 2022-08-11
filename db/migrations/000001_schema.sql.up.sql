@@ -21,12 +21,12 @@ CREATE TABLE "voters" (
   "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
   "full_name" varchar NOT NULL,
   "email" varchar NOT NULL,
-  "registered_at" timestamptz PRIMARY KEY NOT NULL DEFAULT 'now()',
+  "registered_at" timestamptz NOT NULL DEFAULT 'now()',
   "voted" boolean DEFAULT 'FALSE',
   "verified" boolean DEFAULT 'FALSE',
   "national_id_number" bigint NOT NULL,
-  "image_address" varchar UNIQUE NOT NULL,
-  "ethereum_address" varchar NOT NULL,
+  "image_address" varchar NOT NULL,
+  "ethereum_address" varchar UNIQUE NOT NULL,
   "region" varchar NOT NULL
 );
 
