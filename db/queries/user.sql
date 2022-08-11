@@ -20,3 +20,9 @@ SELECT COUNT(email) FROM users;
 -- name: UpdateRegisterationState :one
 UPDATE users SET registered_voter = true RETURNING *;
 
+-- name: UpdateVotedPresident :one
+UPDATE users SET voted_president = true WHERE email = $1 RETURNING *;
+
+-- name: UpdateVotedGovernor :one
+UPDATE users SET voted_governor = true WHERE email = $1 RETURNING *;
+

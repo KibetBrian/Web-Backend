@@ -10,3 +10,6 @@ SELECT * FROM contestants WHERE position = 'president';
 
 -- name: GetGubernatorialCandidates :many
 SELECT * FROM contestants WHERE position = 'governor';
+
+-- name: GetCandidateByAddress :one
+SELECT * FROM contestants WHERE ethereum_address = $1;
