@@ -26,6 +26,9 @@ func NewServer() *Server{
 	server.router.POST("/voter/reject", server.RejectVoter)
 	server.router.GET("/voter/pending", server.GetPendingVoters)
 	server.router.GET("/voter/registered", server.GetTotalRegisteredVoters)
+	server.router.POST("/voted/governor", server.UpdateVotedGovernor)
+	server.router.POST("/voted/president", server.UpdateVotedPresident)
+	server.router.GET("/results/presidential", server.PresidentialResults)
 
 
 	return server;
